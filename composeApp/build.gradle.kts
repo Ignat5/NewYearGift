@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.compose.navigation)
             implementation(libs.kotlinx.datetime)
+            implementation(compose.components.resources)
 
 
         }
