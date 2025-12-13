@@ -1,20 +1,25 @@
 package org.example.project.feature.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +72,9 @@ private fun HomeScreenStateless(
         topBar = {
             HomeTopBar()
         },
+//        containerColor = ,
         modifier = Modifier
+            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
     ) { innerPadding ->
         if (uiState !is HomeState.Data) return@Scaffold
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -89,7 +96,7 @@ private fun HomeContent(
     val scope = rememberCoroutineScope()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxSize()
     ) {
         HorizontalPager(
             state = pagerState,
@@ -97,29 +104,22 @@ private fun HomeContent(
             userScrollEnabled = false,
             modifier = modifier,
         ) { pageIndex ->
-            ItemCard(
-                card = uiState.cards[pageIndex]
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ItemCard(
+                    card = uiState.cards[pageIndex],
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
         Spacer(Modifier.height(24.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedButton(
-                enabled = pagerState.currentPage != 0,
-                onClick = {
-                    val prevPageIndex = (pagerState.currentPage - 1).coerceAtLeast(0)
-                    scope.launch {
-                        pagerState.animateScrollToPage(prevPageIndex)
-                    }
-                }
-            ) {
-                Text(text = "Предыдущий")
-            }
-            OutlinedButton(
-                enabled = pagerState.currentPage <= pagerState.pageCount - 1,
+        Box(modifier = Modifier.weight(1f)) {
+            Button(
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(fraction = 0.75f)
+                    .padding(vertical = 16.dp)
+                ,
                 onClick = {
                     val lastIndex = pagerState.pageCount - 1
                     val nextPageIndex = (pagerState.currentPage + 1).coerceAtMost(lastIndex)
@@ -128,21 +128,27 @@ private fun HomeContent(
                     }
                 }
             ) {
-                Text(text = "Следующий")
+                Text(
+                    text = "Дальше",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ItemCard(card: Card) {
+private fun ItemCard(
+    card: Card,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
     ) {
         Column(
             modifier = Modifier
-                .sizeIn(minHeight = 400.dp)
-                .fillMaxWidth()
+                .fillMaxHeight(0.6f)
+                .fillMaxWidth(fraction = 0.75f)
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             Text(
