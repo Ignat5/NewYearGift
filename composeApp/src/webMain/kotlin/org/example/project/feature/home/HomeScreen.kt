@@ -44,9 +44,9 @@ import org.example.project.feature.home.components.HomeIntent
 import org.example.project.feature.home.components.HomeState
 import newyeargift.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.painterResource
-import newyeargift.composeapp.generated.resources.compose_multiplatform
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
+import org.example.project.feature.home.dialog.ui.HomeDialogContent
 
 @Composable
 fun HomeScreen() {
@@ -73,9 +73,12 @@ private fun HomeScreenStateless(
 ) {
     Scaffold(
         topBar = {
-            HomeTopBar()
+            HomeTopBar(
+                onPickCardTypeClick = {
+                    onIntent(HomeIntent.OnPickCardFilterTypeClick)
+                }
+            )
         },
-//        containerColor = ,
         modifier = Modifier
             .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
     ) { innerPadding ->
@@ -86,6 +89,15 @@ private fun HomeScreenStateless(
                 onIntent = onIntent,
             )
         }
+        HomeDialogContent(
+            dialogState = uiState.dialogState,
+            onConfirmCardType = {
+                onIntent(HomeIntent.OnConfirmCardFilterType(it))
+            },
+            onDismissRequest = {
+                onIntent(HomeIntent.OnDismissDialogRequest)
+            }
+        )
     }
 }
 
@@ -175,7 +187,9 @@ private fun ItemCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar() {
+private fun HomeTopBar(
+    onPickCardTypeClick: () -> Unit
+) {
     TopAppBar(
         title = { Text("E&I") },
         navigationIcon = {
@@ -204,7 +218,10 @@ private fun HomeTopBar() {
                         allItems.forEach { item ->
                             DropdownMenuItem(
                                 text = { Text(text = item.name) },
-                                onClick = {  }
+                                onClick = {
+                                    onPickCardTypeClick()
+                                    isDropdownExpanded = false
+                                }
                             )
                         }
                     }

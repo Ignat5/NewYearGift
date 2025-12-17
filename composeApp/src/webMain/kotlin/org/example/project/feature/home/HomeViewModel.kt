@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import org.example.project.core.presentation.BaseViewModel
 import org.example.project.domain.model.card.CardType
 import org.example.project.domain.use_case.CardUseCase
 import org.example.project.feature.home.components.HomeIntent
 import org.example.project.feature.home.components.HomeSideEffect
 import org.example.project.feature.home.components.HomeState
+import org.example.project.feature.home.dialog.model.HomeDialogState
 import org.example.project.feature.home.model.CardFilterType
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,16 +23,19 @@ class HomeViewModel(
     private val cardUseCase: CardUseCase
 ) : BaseViewModel<HomeState, HomeIntent, HomeSideEffect>() {
 
-    private val currentFilterTypeState = MutableStateFlow(CardFilterType.Question)
+    private val currentFilterTypeState = MutableStateFlow(CardFilterType.All)
     private val cardsFlow = readCards()
+    private val uiDialogState = MutableStateFlow<HomeDialogState>(HomeDialogState.Init)
 
     override val uiState: StateFlow<HomeState> = combine(
         currentFilterTypeState,
-        cardsFlow
-    ) { currentFilterType, cards ->
+        cardsFlow,
+        uiDialogState
+    ) { currentFilterType, cards, dialogState ->
         HomeState.Data(
             currentFilterType = currentFilterType,
-            cards = cards
+            cards = cards,
+            dialogState = dialogState
         )
     }.stateIn(
         viewModelScope,
@@ -39,8 +44,27 @@ class HomeViewModel(
     )
 
     override fun onIntent(intent: HomeIntent) {
-
+        when (intent) {
+            is HomeIntent.OnPickCardFilterTypeClick -> onPickCardFilterTypeClick()
+            is HomeIntent.OnConfirmCardFilterType -> onConfirmCardFilterType(intent)
+            is HomeIntent.OnDismissDialogRequest -> onDismissDialogRequest()
+        }
     }
+
+    private fun onPickCardFilterTypeClick() {
+        uiDialogState.update {
+            HomeDialogState.PickCardType(currentType = currentFilterTypeState.value)
+        }
+    }
+
+    private fun onConfirmCardFilterType(intent: HomeIntent.OnConfirmCardFilterType) {
+        currentFilterTypeState.update { intent.type }
+        resetDialogState()
+    }
+
+    private fun onDismissDialogRequest() = resetDialogState()
+
+    private fun resetDialogState() = uiDialogState.update { HomeDialogState.Init }
 
     private fun readCards() = currentFilterTypeState.flatMapLatest { filterType ->
         val type = when (filterType) {
