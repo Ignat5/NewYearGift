@@ -14,10 +14,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.example.project.feature.home.HomeScreen
+import org.example.project.theme.AppTheme
 
 @Composable
 fun App() {
-    MaterialTheme {
+    AppTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
