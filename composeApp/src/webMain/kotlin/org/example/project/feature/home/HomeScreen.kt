@@ -14,6 +14,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,11 +32,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import newyeargift.composeapp.generated.resources.MarckScript
 import org.example.project.data.FakeCardRepository
 import org.example.project.data.data_source.FakeLocalCardDataSource
 import org.example.project.domain.model.card.Card
@@ -43,10 +48,13 @@ import org.example.project.domain.use_case.CardUseCase
 import org.example.project.feature.home.components.HomeIntent
 import org.example.project.feature.home.components.HomeState
 import newyeargift.composeapp.generated.resources.Res
+import newyeargift.composeapp.generated.resources.ShantellSans
 import org.jetbrains.compose.resources.painterResource
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
 import org.example.project.feature.home.dialog.ui.HomeDialogContent
+import org.jetbrains.compose.resources.Font
+import kotlin.random.Random
 
 @Composable
 fun HomeScreen() {
@@ -115,7 +123,7 @@ private fun HomeContent(
     ) {
         HorizontalPager(
             state = pagerState,
-            beyondViewportPageCount = 0,
+            beyondViewportPageCount = 1,
             userScrollEnabled = false,
             modifier = modifier,
         ) { pageIndex ->
@@ -133,8 +141,7 @@ private fun HomeContent(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth(fraction = 0.75f)
-                    .padding(vertical = 16.dp)
-                ,
+                    .padding(vertical = 16.dp),
                 onClick = {
                     val lastIndex = pagerState.pageCount - 1
                     val nextPageIndex = (pagerState.currentPage + 1).coerceAtMost(lastIndex)
@@ -145,6 +152,11 @@ private fun HomeContent(
             ) {
                 Text(
                     text = "Дальше",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily(
+                            Font(Res.font.ShantellSans)
+                        )
+                    ),
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
@@ -158,6 +170,9 @@ private fun ItemCard(
     modifier: Modifier = Modifier
 ) {
     Card(
+        colors = CardDefaults.cardColors().copy(
+            containerColor = generateLightColor()
+        ),
         modifier = modifier
     ) {
         Column(
@@ -168,7 +183,11 @@ private fun ItemCard(
         ) {
             Text(
                 text = card.type.name,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.ShantellSans)
+                    )
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -176,7 +195,11 @@ private fun ItemCard(
             Spacer(Modifier.height(24.dp))
             Text(
                 text = card.content,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.MarckScript)
+                    )
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -191,7 +214,16 @@ private fun HomeTopBar(
     onPickCardTypeClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text("E&I") },
+        title = {
+            Text(
+                text = "EI",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.ShantellSans)
+                    )
+                )
+            )
+        },
         navigationIcon = {
             IconButton(onClick = {}) {
                 Icon(
@@ -233,4 +265,13 @@ private fun HomeTopBar(
 
 private enum class ItemMenu {
     PickCardType
+}
+
+private fun generateLightColor(): Color {
+    val hue = Random.nextFloat() * 360f // Random hue from 0 to 360
+    val saturation = 0.5f + (Random.nextFloat() * 0.4f) // Keep saturation moderate (50-90%)
+    val lightness = 0.85f + (Random.nextFloat() * 0.1f) // Keep lightness very high (85-95%)
+
+    // Convert HSL to Compose Color
+    return Color.hsl(hue, saturation, lightness)
 }
