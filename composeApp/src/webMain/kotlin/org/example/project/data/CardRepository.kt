@@ -9,6 +9,6 @@ interface CardRepository {
     fun readCards(isDone: Boolean): Flow<List<Card>>
     fun readCardsByType(type: CardType): Flow<List<Card>>
     fun readCardsByType(type: CardType, isDone: Boolean): Flow<List<Card>>
-    suspend fun updateCardIsDone(id: String, isDone: Boolean)
+    suspend fun updateCardIsDone(id: String)
 
 }

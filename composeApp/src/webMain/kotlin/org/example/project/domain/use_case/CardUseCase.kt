@@ -28,7 +28,7 @@ class CardUseCase(private val repository: CardRepository) {
     }
 
     suspend fun markCardAsDone(id: String) {
-        repository.updateCardIsDone(id = id, isDone = true)
+        repository.updateCardIsDone(id = id)
     }
 
 }

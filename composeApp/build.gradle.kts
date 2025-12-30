@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -37,8 +38,9 @@ kotlin {
             implementation(libs.settings.noarg)
             implementation(libs.settings.coroutines)
 
-
+            implementation(libs.kotlin.serialization)
         }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }

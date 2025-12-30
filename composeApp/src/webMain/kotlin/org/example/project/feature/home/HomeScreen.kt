@@ -34,15 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
 import newyeargift.composeapp.generated.resources.MarckScript
-import org.example.project.data.FakeCardRepository
+import org.example.project.data.DefaultCardRepository
 import org.example.project.data.data_source.FakeLocalCardDataSource
 import org.example.project.domain.model.card.Card
 import org.example.project.domain.use_case.CardUseCase
@@ -53,6 +51,7 @@ import newyeargift.composeapp.generated.resources.ShantellSans
 import org.jetbrains.compose.resources.painterResource
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
+import org.example.project.data.data_source.settings.DefaultLocalCardSettings
 import org.example.project.feature.home.dialog.ui.HomeDialogContent
 import org.jetbrains.compose.resources.Font
 import kotlin.random.Random
@@ -62,8 +61,9 @@ fun HomeScreen() {
     val viewModel = viewModel {
         HomeViewModel(
             cardUseCase = CardUseCase(
-                repository = FakeCardRepository(
-                    localDataSource = FakeLocalCardDataSource()
+                repository = DefaultCardRepository(
+                    localDataSource = FakeLocalCardDataSource(),
+                    localSettings = DefaultLocalCardSettings()
                 )
             )
         )
