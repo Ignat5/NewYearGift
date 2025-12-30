@@ -27,4 +27,8 @@ class CardUseCase(private val repository: CardRepository) {
         if (isRandom) allCards.shuffled(random) else allCards
     }
 
+    suspend fun markCardAsDone(id: String) {
+        repository.updateCardIsDone(id = id, isDone = true)
+    }
+
 }

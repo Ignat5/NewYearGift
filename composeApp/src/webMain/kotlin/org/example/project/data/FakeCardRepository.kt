@@ -26,9 +26,8 @@ class FakeCardRepository(
         allCards.filter { it.type == type && it.isDone == isDone }
     }
 
-    suspend fun updateCardIsDone(id: String, isDone: Boolean) {
-        val card = localDataSource.readCardById(id).firstOrNull() ?: return
-        localDataSource.updateCard(card.copy(isDone = isDone))
+    override suspend fun updateCardIsDone(id: String, isDone: Boolean) {
+        localDataSource.updateCardIsDone(id, isDone)
     }
 
 }

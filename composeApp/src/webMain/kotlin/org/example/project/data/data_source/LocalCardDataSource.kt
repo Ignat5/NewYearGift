@@ -7,6 +7,6 @@ interface LocalCardDataSource {
 
     fun readCards(): Flow<List<Card>>
     fun readCardById(id: String): Flow<Card?>
-    suspend fun updateCard(card: Card)
+    suspend fun updateCardIsDone(id: String, isDone: Boolean)
 
 }

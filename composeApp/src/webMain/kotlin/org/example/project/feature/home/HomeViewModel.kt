@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.example.project.core.presentation.BaseViewModel
 import org.example.project.domain.model.card.CardType
 import org.example.project.domain.use_case.CardUseCase
@@ -59,6 +60,8 @@ class HomeViewModel(
 
     private fun onNextClick() {
         val allCards = cardsState.value ?: return
+        val currentCard = allCards[currentPageIndexState.value]
+        viewModelScope.launch { cardUseCase.markCardAsDone(currentCard.id) }
         currentPageIndexState.update { currentPageIndex ->
             (currentPageIndex + 1).coerceAtMost(allCards.lastIndex)
         }
