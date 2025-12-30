@@ -1,5 +1,6 @@
 package org.example.project.data.data_source
 
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,9 +11,15 @@ import org.example.project.domain.model.card.CardType
 
 class FakeLocalCardDataSource : LocalCardDataSource {
 
+    private val settings = Settings()
+
     private val allCardsState = MutableStateFlow(getInitCards())
 
-    override fun readCards(): Flow<List<Card>> = allCardsState.asStateFlow()
+    override fun readCards(): Flow<List<Card>> = allCardsState.map { allCards ->
+        allCards.map { card ->
+            card.copy(isDone = settings.getBoolean(card.id, false))
+        }
+    }
 
     override fun readCardById(id: String): Flow<Card?> = allCardsState.map { allCards ->
         allCards.find { it.id == id }
@@ -25,6 +32,10 @@ class FakeLocalCardDataSource : LocalCardDataSource {
             set(indexOfFirst { it.id == card.id }, card)
         }
         allCardsState.update { newCards }
+    }
+
+    suspend fun markCardAsDone(id: String) {
+        settings.putBoolean(id, true)
     }
 
     private fun getInitCards(): List<Card> {

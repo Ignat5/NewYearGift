@@ -13,7 +13,8 @@ sealed interface HomeState : BaseState {
     data class Data(
         val currentFilterType: CardFilterType,
         val cards: List<Card>,
-        val dialogState: HomeDialogState
+        val dialogState: HomeDialogState,
+        val logs: String
     ) : HomeState
 
     @Stable

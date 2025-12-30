@@ -172,7 +172,6 @@ private fun ItemCard(
     Card(
         colors = CardDefaults.cardColors().copy(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
-//            containerColor = Color(0xFFF6EEE3) //generateLightColor()
         ),
         modifier = modifier
     ) {

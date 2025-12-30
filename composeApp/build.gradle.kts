@@ -34,6 +34,9 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(compose.components.resources)
 
+            implementation(libs.settings.noarg)
+            implementation(libs.settings.coroutines)
+
 
         }
         commonTest.dependencies {
