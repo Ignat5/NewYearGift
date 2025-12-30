@@ -9,6 +9,8 @@ sealed interface HomeIntent : BaseIntent {
 
     data object OnPickCardFilterTypeClick : HomeIntent
 
+    data object OnStatisticsClick : HomeIntent
+
     data class OnConfirmCardFilterType(val type: CardFilterType) : HomeIntent
 
     data object OnDismissDialogRequest : HomeIntent

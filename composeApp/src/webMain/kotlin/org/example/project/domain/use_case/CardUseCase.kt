@@ -12,6 +12,8 @@ class CardUseCase(private val repository: CardRepository) {
 
     private val random get() = Random(Clock.System.now().toEpochMilliseconds())
 
+    fun readCards() = repository.readCards()
+
     fun readCards(
         isDone: Boolean,
         isRandom: Boolean
@@ -30,5 +32,7 @@ class CardUseCase(private val repository: CardRepository) {
     suspend fun markCardAsDone(id: String) {
         repository.updateCardIsDone(id = id)
     }
+
+    suspend fun resetProgress() = repository.resetProgress()
 
 }

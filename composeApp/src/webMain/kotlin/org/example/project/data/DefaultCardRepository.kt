@@ -14,7 +14,7 @@ class DefaultCardRepository(
     private val localSettings: LocalCardSettings
 ) : CardRepository {
 
-    private val cardsFlow = localDataSource.readCards().map { allCards ->
+    private val cardsFlow get() = localDataSource.readCards().map { allCards ->
         val allDoneIds = localSettings.getDoneCardIds()
         if (Toggles.isFilterByDoneEnabled) {
             allCards.map { card ->
@@ -26,6 +26,8 @@ class DefaultCardRepository(
         println("All cards:")
         println(allCards)
     }
+
+    override fun readCards(): Flow<List<Card>> = cardsFlow
 
     override fun readCards(isDone: Boolean): Flow<List<Card>> = cardsFlow.map { allCards ->
         allCards.filter { it.isDone == isDone }
@@ -42,5 +44,7 @@ class DefaultCardRepository(
     override suspend fun updateCardIsDone(id: String) {
         localSettings.markCardAsDone(id)
     }
+
+    override suspend fun resetProgress() = localSettings.clear()
 
 }

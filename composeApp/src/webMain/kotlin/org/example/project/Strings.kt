@@ -5,4 +5,5 @@ object Strings {
     const val ACTIONS = "Действия"
     const val QUIZ = "Квиз"
     const val ALL = "Все"
+    const val RESET_PROGRESS = "Сбросить прогресс"
 }

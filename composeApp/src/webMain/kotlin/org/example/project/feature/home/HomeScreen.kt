@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import newyeargift.composeapp.generated.resources.MarckScript
 import org.example.project.data.DefaultCardRepository
 import org.example.project.data.data_source.fake.FakeLocalCardDataSource
@@ -55,13 +56,16 @@ import org.example.project.Strings
 import org.example.project.data.data_source.file.FileLocalCardDataSource
 import org.example.project.data.settings.DefaultLocalCardSettings
 import org.example.project.domain.model.card.CardType
+import org.example.project.feature.home.components.HomeSideEffect
 import org.example.project.feature.home.dialog.ui.HomeDialogContent
 import org.example.project.feature.home.model.CardFilterType
 import org.jetbrains.compose.resources.Font
 import kotlin.random.Random
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onNavigateToStatistics: () -> Unit
+) {
     val viewModel = viewModel {
         HomeViewModel(
             cardUseCase = CardUseCase(
@@ -77,6 +81,12 @@ fun HomeScreen() {
         uiState = uiState,
         onIntent = viewModel::onIntent
     )
+    val sideEffectState by viewModel.sideEffectState.collectAsStateWithLifecycle()
+    HandleSideEffects(
+        sideEffectState = sideEffectState,
+        onSideEffectHandled = viewModel::onSideEffectHandled,
+        onNavigateToStatistics = onNavigateToStatistics
+    )
 }
 
 @Composable
@@ -89,11 +99,13 @@ private fun HomeScreenStateless(
             HomeTopBar(
                 onPickCardTypeClick = {
                     onIntent(HomeIntent.OnPickCardFilterTypeClick)
+                },
+                onStatisticsClick = {
+                    onIntent(HomeIntent.OnStatisticsClick)
                 }
             )
         },
         modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
     ) { innerPadding ->
         if (uiState !is HomeState.Data) return@Scaffold
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -218,7 +230,8 @@ private fun ItemCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBar(
-    onPickCardTypeClick: () -> Unit
+    onPickCardTypeClick: () -> Unit,
+    onStatisticsClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -259,7 +272,10 @@ private fun HomeTopBar(
                             DropdownMenuItem(
                                 text = { Text(text = text) },
                                 onClick = {
-                                    onPickCardTypeClick()
+                                    when (item) {
+                                        ItemMenu.PickCardType -> onPickCardTypeClick()
+                                        ItemMenu.Statistics -> onStatisticsClick()
+                                    }
                                     isDropdownExpanded = false
                                 }
                             )
@@ -271,6 +287,25 @@ private fun HomeTopBar(
     )
 }
 
+@Composable
+private fun HandleSideEffects(
+    sideEffectState: HomeSideEffect?,
+    onSideEffectHandled: () -> Unit,
+    onNavigateToStatistics: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(sideEffectState) {
+        sideEffectState?.let {
+            scope.launch {
+                when (sideEffectState) {
+                    is HomeSideEffect.Navigation.Statistics -> onNavigateToStatistics()
+                }
+            }
+            onSideEffectHandled()
+        }
+    }
+}
+
 private fun CardType.toDisplayText() = when (this) {
     CardType.Question -> Strings.QUESTIONS
     CardType.Action -> Strings.ACTIONS
@@ -278,9 +313,11 @@ private fun CardType.toDisplayText() = when (this) {
 }
 
 private enum class ItemMenu {
-    PickCardType
+    PickCardType,
+    Statistics
 }
 
 private fun ItemMenu.toDisplayText(): String = when(this) {
     ItemMenu.PickCardType -> "Выбрать тип"
+    ItemMenu.Statistics -> "Статистика"
 }

@@ -53,6 +53,7 @@ class HomeViewModel(
         when (intent) {
             is HomeIntent.OnNextClick -> onNextClick()
             is HomeIntent.OnPickCardFilterTypeClick -> onPickCardFilterTypeClick()
+            is HomeIntent.OnStatisticsClick -> onStatisticsClick()
             is HomeIntent.OnConfirmCardFilterType -> onConfirmCardFilterType(intent)
             is HomeIntent.OnDismissDialogRequest -> onDismissDialogRequest()
         }
@@ -71,6 +72,10 @@ class HomeViewModel(
         uiDialogState.update {
             HomeDialogState.PickCardType(currentType = currentFilterTypeState.value)
         }
+    }
+
+    private fun onStatisticsClick() {
+        sendSideEffect(HomeSideEffect.Navigation.Statistics)
     }
 
     private fun onConfirmCardFilterType(intent: HomeIntent.OnConfirmCardFilterType) {
