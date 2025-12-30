@@ -1,4 +1,4 @@
-package org.example.project.data.data_source.settings
+package org.example.project.data.settings
 
 interface LocalCardSettings {
     suspend fun getDoneCardIds(): Set<String>

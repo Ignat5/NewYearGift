@@ -1,4 +1,4 @@
-package org.example.project.data.data_source.settings
+package org.example.project.data.settings
 
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.Settings

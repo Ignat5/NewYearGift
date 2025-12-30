@@ -41,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import newyeargift.composeapp.generated.resources.MarckScript
 import org.example.project.data.DefaultCardRepository
-import org.example.project.data.data_source.FakeLocalCardDataSource
+import org.example.project.data.data_source.fake.FakeLocalCardDataSource
 import org.example.project.domain.model.card.Card
 import org.example.project.domain.use_case.CardUseCase
 import org.example.project.feature.home.components.HomeIntent
@@ -51,7 +51,8 @@ import newyeargift.composeapp.generated.resources.ShantellSans
 import org.jetbrains.compose.resources.painterResource
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
-import org.example.project.data.data_source.settings.DefaultLocalCardSettings
+import org.example.project.data.data_source.file.FileLocalCardDataSource
+import org.example.project.data.settings.DefaultLocalCardSettings
 import org.example.project.feature.home.dialog.ui.HomeDialogContent
 import org.jetbrains.compose.resources.Font
 import kotlin.random.Random
@@ -62,7 +63,8 @@ fun HomeScreen() {
         HomeViewModel(
             cardUseCase = CardUseCase(
                 repository = DefaultCardRepository(
-                    localDataSource = FakeLocalCardDataSource(),
+//                    localDataSource = FakeLocalCardDataSource(),
+                    localDataSource = FileLocalCardDataSource(),
                     localSettings = DefaultLocalCardSettings()
                 )
             )

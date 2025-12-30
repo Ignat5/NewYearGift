@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "type": "Question",
+    "content": "What do you think about when you are alone?",
+    "isDone": false
+  },
+  {
+    "id": "4",
+    "type": "Action",
+    "content": "Hug each other in silence for 1 minute",
+    "isDone": false
+  }
+]

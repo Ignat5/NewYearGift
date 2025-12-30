@@ -1,26 +1,16 @@
-package org.example.project.data.data_source
+package org.example.project.data.data_source.fake
 
-import com.russhwolf.settings.ExperimentalSettingsApi
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.coroutines.toSuspendSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
+import org.example.project.data.data_source.LocalCardDataSource
 import org.example.project.domain.model.card.Card
 import org.example.project.domain.model.card.CardType
 
-@OptIn(ExperimentalSettingsApi::class)
 class FakeLocalCardDataSource : LocalCardDataSource {
-
-    private val settings = Settings().toSuspendSettings()
 
     private val allCardsState = MutableStateFlow(getInitCards())
 
     override fun readCards(): Flow<List<Card>> = allCardsState
-
-    override fun readCardById(id: String): Flow<Card?> = allCardsState.map { allCards ->
-        allCards.find { it.id == id }
-    }
 
     private fun getInitCards(): List<Card> {
         return buildList {
