@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -143,11 +144,7 @@ private fun HomeContent(
                     .fillMaxWidth(fraction = 0.75f)
                     .padding(vertical = 16.dp),
                 onClick = {
-                    val lastIndex = pagerState.pageCount - 1
-                    val nextPageIndex = (pagerState.currentPage + 1).coerceAtMost(lastIndex)
-                    scope.launch {
-                        pagerState.animateScrollToPage(nextPageIndex)
-                    }
+                    onIntent(HomeIntent.OnNextClick)
                 }
             ) {
                 Text(
@@ -159,6 +156,11 @@ private fun HomeContent(
                     ),
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+            }
+        }
+        LaunchedEffect(uiState.currentPageIndex) {
+            if (pagerState.currentPage != uiState.currentPageIndex) {
+                pagerState.animateScrollToPage(uiState.currentPageIndex)
             }
         }
     }

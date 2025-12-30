@@ -11,10 +11,10 @@ sealed interface HomeState : BaseState {
 
     @Stable
     data class Data(
+        val currentPageIndex: Int,
         val currentFilterType: CardFilterType,
         val cards: List<Card>,
         val dialogState: HomeDialogState,
-        val logs: String
     ) : HomeState
 
     @Stable

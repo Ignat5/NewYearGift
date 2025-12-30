@@ -5,11 +5,12 @@ import org.example.project.feature.home.model.CardFilterType
 
 sealed interface HomeIntent : BaseIntent {
 
+    data object OnNextClick : HomeIntent
+
     data object OnPickCardFilterTypeClick : HomeIntent
 
-    data class OnConfirmCardFilterType(
-        val type: CardFilterType
-    ) : HomeIntent
+    data class OnConfirmCardFilterType(val type: CardFilterType) : HomeIntent
+
     data object OnDismissDialogRequest : HomeIntent
 
 }

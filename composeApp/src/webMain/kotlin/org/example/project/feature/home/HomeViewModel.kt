@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,16 +24,20 @@ class HomeViewModel(
     private val cardUseCase: CardUseCase
 ) : BaseViewModel<HomeState, HomeIntent, HomeSideEffect>() {
 
+    private val currentPageIndexState = MutableStateFlow(0)
     private val currentFilterTypeState = MutableStateFlow(CardFilterType.All)
-    private val cardsFlow = readCards()
+    private val cardsState = readCardsState()
+    private val cardsFlow = cardsState.filterNotNull()
     private val uiDialogState = MutableStateFlow<HomeDialogState>(HomeDialogState.Init)
 
     override val uiState: StateFlow<HomeState> = combine(
+        currentPageIndexState,
         currentFilterTypeState,
         cardsFlow,
         uiDialogState
-    ) { currentFilterType, cards, dialogState ->
+    ) { currentPageIndex, currentFilterType, cards, dialogState ->
         HomeState.Data(
+            currentPageIndex = currentPageIndex,
             currentFilterType = currentFilterType,
             cards = cards,
             dialogState = dialogState
@@ -45,9 +50,17 @@ class HomeViewModel(
 
     override fun onIntent(intent: HomeIntent) {
         when (intent) {
+            is HomeIntent.OnNextClick -> onNextClick()
             is HomeIntent.OnPickCardFilterTypeClick -> onPickCardFilterTypeClick()
             is HomeIntent.OnConfirmCardFilterType -> onConfirmCardFilterType(intent)
             is HomeIntent.OnDismissDialogRequest -> onDismissDialogRequest()
+        }
+    }
+
+    private fun onNextClick() {
+        val allCards = cardsState.value ?: return
+        currentPageIndexState.update { currentPageIndex ->
+            (currentPageIndex + 1).coerceAtMost(allCards.lastIndex)
         }
     }
 
@@ -66,7 +79,7 @@ class HomeViewModel(
 
     private fun resetDialogState() = uiDialogState.update { HomeDialogState.Init }
 
-    private fun readCards() = currentFilterTypeState.flatMapLatest { filterType ->
+    private fun readCardsState() = currentFilterTypeState.flatMapLatest { filterType ->
         val type = when (filterType) {
             CardFilterType.Question -> CardType.Question
             CardFilterType.Action -> CardType.Action
@@ -76,6 +89,10 @@ class HomeViewModel(
         type?.let {
             cardUseCase.readCardsByType(type = type, isDone = false, isRandom = true)
         } ?: cardUseCase.readCards(isDone = false, isRandom = true)
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        null
+    )
 
 }

@@ -18,6 +18,9 @@ class FakeLocalCardDataSource : LocalCardDataSource {
     override fun readCards(): Flow<List<Card>> = allCardsState.map { allCards ->
         allCards.map { card ->
             card.copy(isDone = settings.getBoolean(card.id, false))
+                .also {
+                    println(card)
+                }
         }
     }
 
@@ -34,8 +37,8 @@ class FakeLocalCardDataSource : LocalCardDataSource {
         allCardsState.update { newCards }
     }
 
-    suspend fun markCardAsDone(id: String) {
-        settings.putBoolean(id, true)
+    suspend fun updateCardIsDone(id: String, isDone: Boolean) {
+        settings.putBoolean(id, isDone)
     }
 
     private fun getInitCards(): List<Card> {
