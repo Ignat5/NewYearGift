@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import org.example.project.Strings
 import org.example.project.feature.home.model.CardFilterType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,8 +72,9 @@ private fun ItemType(
         modifier = Modifier.clickable(onClick = onClick)
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
+            val text = remember(item) { item.toDisplayText() }
             Text(
-                text = item.name,
+                text = text,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,4 +82,11 @@ private fun ItemType(
             )
         }
     }
+}
+
+private fun CardFilterType.toDisplayText() = when (this) {
+    CardFilterType.All -> Strings.ALL
+    CardFilterType.Question -> Strings.QUESTIONS
+    CardFilterType.Action -> Strings.ACTIONS
+    CardFilterType.Quiz -> Strings.QUIZ
 }

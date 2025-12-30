@@ -51,9 +51,12 @@ import newyeargift.composeapp.generated.resources.ShantellSans
 import org.jetbrains.compose.resources.painterResource
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
+import org.example.project.Strings
 import org.example.project.data.data_source.file.FileLocalCardDataSource
 import org.example.project.data.settings.DefaultLocalCardSettings
+import org.example.project.domain.model.card.CardType
 import org.example.project.feature.home.dialog.ui.HomeDialogContent
+import org.example.project.feature.home.model.CardFilterType
 import org.jetbrains.compose.resources.Font
 import kotlin.random.Random
 
@@ -63,7 +66,6 @@ fun HomeScreen() {
         HomeViewModel(
             cardUseCase = CardUseCase(
                 repository = DefaultCardRepository(
-//                    localDataSource = FakeLocalCardDataSource(),
                     localDataSource = FileLocalCardDataSource(),
                     localSettings = DefaultLocalCardSettings()
                 )
@@ -185,8 +187,9 @@ private fun ItemCard(
                 .fillMaxWidth(fraction = 0.75f)
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
+            val typeText = remember(card) { card.type.toDisplayText() }
             Text(
-                text = card.type.name,
+                text = typeText,
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontFamily = FontFamily(
                         Font(Res.font.ShantellSans)
@@ -252,8 +255,9 @@ private fun HomeTopBar(
                     ) {
                         val allItems = ItemMenu.entries
                         allItems.forEach { item ->
+                            val text = remember(item) { item.toDisplayText() }
                             DropdownMenuItem(
-                                text = { Text(text = item.name) },
+                                text = { Text(text = text) },
                                 onClick = {
                                     onPickCardTypeClick()
                                     isDropdownExpanded = false
@@ -267,15 +271,16 @@ private fun HomeTopBar(
     )
 }
 
+private fun CardType.toDisplayText() = when (this) {
+    CardType.Question -> Strings.QUESTIONS
+    CardType.Action -> Strings.ACTIONS
+    CardType.Quiz -> Strings.QUIZ
+}
+
 private enum class ItemMenu {
     PickCardType
 }
 
-private fun generateLightColor(): Color {
-    val hue = Random.nextFloat() * 360f // Random hue from 0 to 360
-    val saturation = 0.5f + (Random.nextFloat() * 0.4f) // Keep saturation moderate (50-90%)
-    val lightness = 0.85f + (Random.nextFloat() * 0.1f) // Keep lightness very high (85-95%)
-
-    // Convert HSL to Compose Color
-    return Color.hsl(hue, saturation, lightness)
+private fun ItemMenu.toDisplayText(): String = when(this) {
+    ItemMenu.PickCardType -> "Выбрать тип"
 }
