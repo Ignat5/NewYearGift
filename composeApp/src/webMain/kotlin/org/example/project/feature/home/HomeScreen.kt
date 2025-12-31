@@ -97,6 +97,9 @@ private fun HomeScreenStateless(
     Scaffold(
         topBar = {
             HomeTopBar(
+                onSkipForNowClick = {
+                    onIntent(HomeIntent.OnSkipForNowClick)
+                },
                 onPickCardTypeClick = {
                     onIntent(HomeIntent.OnPickCardFilterTypeClick)
                 },
@@ -230,6 +233,7 @@ private fun ItemCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeTopBar(
+    onSkipForNowClick: () -> Unit,
     onPickCardTypeClick: () -> Unit,
     onStatisticsClick: () -> Unit
 ) {
@@ -273,6 +277,7 @@ private fun HomeTopBar(
                                 text = { Text(text = text) },
                                 onClick = {
                                     when (item) {
+                                        ItemMenu.SkipForNow -> onSkipForNowClick()
                                         ItemMenu.PickCardType -> onPickCardTypeClick()
                                         ItemMenu.Statistics -> onStatisticsClick()
                                     }
@@ -313,11 +318,13 @@ private fun CardType.toDisplayText() = when (this) {
 }
 
 private enum class ItemMenu {
+    SkipForNow,
     PickCardType,
     Statistics
 }
 
-private fun ItemMenu.toDisplayText(): String = when(this) {
+private fun ItemMenu.toDisplayText(): String = when (this) {
+    ItemMenu.SkipForNow -> "Отложить карточку на будущее"
     ItemMenu.PickCardType -> "Выбрать тип"
     ItemMenu.Statistics -> "Статистика"
 }

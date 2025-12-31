@@ -52,6 +52,7 @@ class HomeViewModel(
     override fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.OnNextClick -> onNextClick()
+            is HomeIntent.OnSkipForNowClick -> onSkipForNowClick()
             is HomeIntent.OnPickCardFilterTypeClick -> onPickCardFilterTypeClick()
             is HomeIntent.OnStatisticsClick -> onStatisticsClick()
             is HomeIntent.OnConfirmCardFilterType -> onConfirmCardFilterType(intent)
@@ -63,6 +64,15 @@ class HomeViewModel(
         val allCards = cardsState.value ?: return
         val currentCard = allCards[currentPageIndexState.value]
         viewModelScope.launch { cardUseCase.markCardAsDone(currentCard.id) }
+        moveToNextCard()
+    }
+
+    private fun onSkipForNowClick() {
+        moveToNextCard()
+    }
+
+    private fun moveToNextCard() {
+        val allCards = cardsState.value ?: return
         currentPageIndexState.update { currentPageIndex ->
             (currentPageIndex + 1).coerceAtMost(allCards.lastIndex)
         }

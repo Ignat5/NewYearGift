@@ -7,6 +7,8 @@ sealed interface HomeIntent : BaseIntent {
 
     data object OnNextClick : HomeIntent
 
+    data object OnSkipForNowClick : HomeIntent
+
     data object OnPickCardFilterTypeClick : HomeIntent
 
     data object OnStatisticsClick : HomeIntent
