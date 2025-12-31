@@ -1,10 +1,8 @@
-package org.example.project.data.data_source
+package org.example.project.data.data_source.fake
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import org.example.project.data.data_source.LocalCardDataSource
 import org.example.project.domain.model.card.Card
 import org.example.project.domain.model.card.CardType
 
@@ -12,20 +10,7 @@ class FakeLocalCardDataSource : LocalCardDataSource {
 
     private val allCardsState = MutableStateFlow(getInitCards())
 
-    override fun readCards(): Flow<List<Card>> = allCardsState.asStateFlow()
-
-    override fun readCardById(id: String): Flow<Card?> = allCardsState.map { allCards ->
-        allCards.find { it.id == id }
-    }
-
-    override suspend fun updateCard(card: Card) {
-        val oldCards = allCardsState.value
-        val newCards = buildList {
-            addAll(oldCards)
-            set(indexOfFirst { it.id == card.id }, card)
-        }
-        allCardsState.update { newCards }
-    }
+    override fun readCards(): Flow<List<Card>> = allCardsState
 
     private fun getInitCards(): List<Card> {
         return buildList {

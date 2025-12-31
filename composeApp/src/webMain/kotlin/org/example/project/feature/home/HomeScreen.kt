@@ -1,52 +1,78 @@
 package org.example.project.feature.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import org.example.project.data.FakeCardRepository
-import org.example.project.data.data_source.FakeLocalCardDataSource
+import newyeargift.composeapp.generated.resources.MarckScript
+import org.example.project.data.DefaultCardRepository
+import org.example.project.data.data_source.fake.FakeLocalCardDataSource
 import org.example.project.domain.model.card.Card
 import org.example.project.domain.use_case.CardUseCase
 import org.example.project.feature.home.components.HomeIntent
 import org.example.project.feature.home.components.HomeState
+import newyeargift.composeapp.generated.resources.Res
+import newyeargift.composeapp.generated.resources.ShantellSans
+import newyeargift.composeapp.generated.resources.ic_gift
+import org.jetbrains.compose.resources.painterResource
+import newyeargift.composeapp.generated.resources.ic_menu
+import newyeargift.composeapp.generated.resources.ic_more
+import org.example.project.Strings
+import org.example.project.data.data_source.file.FileLocalCardDataSource
+import org.example.project.data.settings.DefaultLocalCardSettings
+import org.example.project.domain.model.card.CardType
+import org.example.project.feature.home.components.HomeSideEffect
+import org.example.project.feature.home.dialog.ui.HomeDialogContent
+import org.example.project.feature.home.model.CardFilterType
+import org.jetbrains.compose.resources.Font
+import kotlin.random.Random
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onNavigateToStatistics: () -> Unit
+) {
     val viewModel = viewModel {
         HomeViewModel(
             cardUseCase = CardUseCase(
-                repository = FakeCardRepository(
-                    localDataSource = FakeLocalCardDataSource()
+                repository = DefaultCardRepository(
+                    localDataSource = FileLocalCardDataSource(),
+                    localSettings = DefaultLocalCardSettings()
                 )
             )
         )
@@ -55,6 +81,12 @@ fun HomeScreen() {
     HomeScreenStateless(
         uiState = uiState,
         onIntent = viewModel::onIntent
+    )
+    val sideEffectState by viewModel.sideEffectState.collectAsStateWithLifecycle()
+    HandleSideEffects(
+        sideEffectState = sideEffectState,
+        onSideEffectHandled = viewModel::onSideEffectHandled,
+        onNavigateToStatistics = onNavigateToStatistics
     )
 }
 
@@ -65,7 +97,17 @@ private fun HomeScreenStateless(
 ) {
     Scaffold(
         topBar = {
-            HomeTopBar()
+            HomeTopBar(
+                onSkipForNowClick = {
+                    onIntent(HomeIntent.OnSkipForNowClick)
+                },
+                onPickCardTypeClick = {
+                    onIntent(HomeIntent.OnPickCardFilterTypeClick)
+                },
+                onStatisticsClick = {
+                    onIntent(HomeIntent.OnStatisticsClick)
+                }
+            )
         },
         modifier = Modifier
     ) { innerPadding ->
@@ -76,6 +118,15 @@ private fun HomeScreenStateless(
                 onIntent = onIntent,
             )
         }
+        HomeDialogContent(
+            dialogState = uiState.dialogState,
+            onConfirmCardType = {
+                onIntent(HomeIntent.OnConfirmCardFilterType(it))
+            },
+            onDismissRequest = {
+                onIntent(HomeIntent.OnDismissDialogRequest)
+            }
+        )
     }
 }
 
@@ -89,65 +140,77 @@ private fun HomeContent(
     val scope = rememberCoroutineScope()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxSize()
     ) {
         HorizontalPager(
             state = pagerState,
-            beyondViewportPageCount = 0,
+            beyondViewportPageCount = 1,
             userScrollEnabled = false,
             modifier = modifier,
         ) { pageIndex ->
-            ItemCard(
-                card = uiState.cards[pageIndex]
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ItemCard(
+                    card = uiState.cards[pageIndex],
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
         Spacer(Modifier.height(24.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedButton(
-                enabled = pagerState.currentPage != 0,
+        Box(modifier = Modifier.weight(1f)) {
+            Button(
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(fraction = 0.75f)
+                    .padding(vertical = 16.dp),
                 onClick = {
-                    val prevPageIndex = (pagerState.currentPage - 1).coerceAtLeast(0)
-                    scope.launch {
-                        pagerState.animateScrollToPage(prevPageIndex)
-                    }
+                    onIntent(HomeIntent.OnNextClick)
                 }
             ) {
-                Text(text = "Предыдущий")
+                Text(
+                    text = "Дальше",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily(
+                            Font(Res.font.ShantellSans)
+                        )
+                    ),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
-            OutlinedButton(
-                enabled = pagerState.currentPage <= pagerState.pageCount - 1,
-                onClick = {
-                    val lastIndex = pagerState.pageCount - 1
-                    val nextPageIndex = (pagerState.currentPage + 1).coerceAtMost(lastIndex)
-                    scope.launch {
-                        pagerState.animateScrollToPage(nextPageIndex)
-                    }
-                }
-            ) {
-                Text(text = "Следующий")
+        }
+        LaunchedEffect(uiState.currentPageIndex) {
+            if (pagerState.currentPage != uiState.currentPageIndex) {
+                pagerState.animateScrollToPage(uiState.currentPageIndex)
             }
         }
     }
 }
 
 @Composable
-private fun ItemCard(card: Card) {
+private fun ItemCard(
+    card: Card,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        colors = CardDefaults.cardColors().copy(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        modifier = modifier
     ) {
         Column(
             modifier = Modifier
-                .sizeIn(minHeight = 400.dp)
-                .fillMaxWidth()
+                .fillMaxHeight(0.6f)
+                .fillMaxWidth(fraction = 0.75f)
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
+            val typeText = remember(card) { card.type.toDisplayText() }
             Text(
-                text = card.type.name,
-                style = MaterialTheme.typography.labelMedium,
+                text = typeText,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.ShantellSans)
+                    )
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,7 +218,11 @@ private fun ItemCard(card: Card) {
             Spacer(Modifier.height(24.dp))
             Text(
                 text = card.content,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.MarckScript)
+                    )
+                ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -166,8 +233,99 @@ private fun ItemCard(card: Card) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar() {
+private fun HomeTopBar(
+    onSkipForNowClick: () -> Unit,
+    onPickCardTypeClick: () -> Unit,
+    onStatisticsClick: () -> Unit
+) {
     TopAppBar(
-        title = { Text("E&I") }
+        title = {
+            Text(
+                text = "E&I",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(
+                        Font(Res.font.ShantellSans)
+                    )
+                )
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_menu),
+                    contentDescription = null
+                )
+            }
+        },
+        actions = {
+            var isDropdownExpanded by remember { mutableStateOf(false) }
+            IconButton(onClick = {
+                isDropdownExpanded = !isDropdownExpanded
+            }) {
+                Box {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_more),
+                        contentDescription = null
+                    )
+                    DropdownMenu(
+                        expanded = isDropdownExpanded,
+                        onDismissRequest = { isDropdownExpanded = false }
+                    ) {
+                        val allItems = ItemMenu.entries
+                        allItems.forEach { item ->
+                            val text = remember(item) { item.toDisplayText() }
+                            DropdownMenuItem(
+                                text = { Text(text = text) },
+                                onClick = {
+                                    when (item) {
+                                        ItemMenu.SkipForNow -> onSkipForNowClick()
+                                        ItemMenu.PickCardType -> onPickCardTypeClick()
+                                        ItemMenu.Statistics -> onStatisticsClick()
+                                    }
+                                    isDropdownExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     )
+}
+
+@Composable
+private fun HandleSideEffects(
+    sideEffectState: HomeSideEffect?,
+    onSideEffectHandled: () -> Unit,
+    onNavigateToStatistics: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(sideEffectState) {
+        sideEffectState?.let {
+            scope.launch {
+                when (sideEffectState) {
+                    is HomeSideEffect.Navigation.Statistics -> onNavigateToStatistics()
+                }
+            }
+            onSideEffectHandled()
+        }
+    }
+}
+
+private fun CardType.toDisplayText() = when (this) {
+    CardType.Question -> Strings.QUESTIONS
+    CardType.Action -> Strings.ACTIONS
+    CardType.Quiz -> Strings.QUIZ
+}
+
+private enum class ItemMenu {
+    SkipForNow,
+    PickCardType,
+    Statistics
+}
+
+private fun ItemMenu.toDisplayText(): String = when (this) {
+    ItemMenu.SkipForNow -> "Отложить карточку на будущее"
+    ItemMenu.PickCardType -> "Выбрать тип"
+    ItemMenu.Statistics -> "Статистика"
 }
