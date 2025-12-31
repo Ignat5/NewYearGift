@@ -49,6 +49,7 @@ import org.example.project.feature.home.components.HomeIntent
 import org.example.project.feature.home.components.HomeState
 import newyeargift.composeapp.generated.resources.Res
 import newyeargift.composeapp.generated.resources.ShantellSans
+import newyeargift.composeapp.generated.resources.ic_gift
 import org.jetbrains.compose.resources.painterResource
 import newyeargift.composeapp.generated.resources.ic_menu
 import newyeargift.composeapp.generated.resources.ic_more
@@ -240,7 +241,7 @@ private fun HomeTopBar(
     TopAppBar(
         title = {
             Text(
-                text = "EI",
+                text = "E&I",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontFamily = FontFamily(
                         Font(Res.font.ShantellSans)
