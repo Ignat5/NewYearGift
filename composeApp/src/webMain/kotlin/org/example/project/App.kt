@@ -25,11 +25,12 @@ fun App() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surfaceDim)
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             RootNavigation()
+            AdvancedSnowFall()
         }
     }
 }
